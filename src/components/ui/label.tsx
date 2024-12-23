@@ -21,15 +21,20 @@ Label.displayName = LabelPrimitive.Root.displayName;
 const LabelInputContainer = ({
   children,
   className,
+  draggable,
 }: {
   children: React.ReactNode;
   className?: string;
+  draggable?: boolean;
 }) => {
   return (
-    <div className={cn("flex flex-col space-y-2 w-full", className)}>
+    <div
+      className={cn("flex flex-col space-y-2 w-full", className)}
+      draggable={draggable ?? false}
+    >
       {children}
     </div>
   );
 };
 
-export { Label,LabelInputContainer };
+export { Label, LabelInputContainer };

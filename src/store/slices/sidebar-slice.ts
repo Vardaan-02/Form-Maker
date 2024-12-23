@@ -6,6 +6,7 @@ import { hslToHex } from "@/lib/color-conversion";
 const initialState: SidebarState = {
   layers: [
     {
+      type: "div",
       id: "1",
       name: "Root Layer",
       isToggled: false,
@@ -16,10 +17,10 @@ const initialState: SidebarState = {
         padding: "0rem",
         margin: "0rem",
         opacity: 1,
-        backgroundColor: `${hslToHex(0, 0, 90)}`,
-        borderRadius: "0rem",
-        borderWidth: "0px",
-        borderColor: "#000000",
+        backgroundColor: `${hslToHex(0, 0, 100)}`,
+        borderRadius: "0px",
+        borderWidth: "1px",
+        borderColor: "#dddddd",
         gap: "0rem",
         height: "100%",
         width: "100%",
@@ -34,11 +35,15 @@ const sidebarSlice = createSlice({
   name: "sidebar",
   initialState,
   reducers: {
-    addLayer: (state, action: PayloadAction<{ parentId: string }>) => {
+    addLayer: (
+      state,
+      action: PayloadAction<{ parentId: string; type: string }>
+    ) => {
       const addToChildren = (layers: Layer[]): Layer[] => {
         return layers.map((layer) => {
           if (layer.id === action.payload.parentId) {
             layer.children.push({
+              type: action.payload.type,
               id: nanoid(),
               name: "Untitled Layer",
               isToggled: false,
@@ -49,10 +54,10 @@ const sidebarSlice = createSlice({
                 padding: "0rem",
                 margin: "0rem",
                 opacity: 1,
-                backgroundColor: `${hslToHex(0, 0, 90 - layer.depth * 10)}`,
+                backgroundColor: `${hslToHex(0, 0, 100)}`,
                 borderRadius: "0rem",
-                borderWidth: "0px",
-                borderColor: "#000000",
+                borderWidth: "1px",
+                borderColor: "#dddddd",
                 gap: "0rem",
                 height: "100%",
                 width: "100%",

@@ -133,18 +133,21 @@ export function LayerItem({
       </div>
       {isExpanded && layer.children.length > 0 && (
         <div>
-          {layer.children.map((childLayer) => (
-            <LayerItem
-              key={childLayer.id}
-              layer={childLayer}
-              onAddLayer={onAddLayer}
-              onRemoveLayer={onRemoveLayer}
-              onUpdateName={onUpdateName}
-              onToggle={onToggle}
-              onMove={onMove}
-              depth={depth + 1}
-            />
-          ))}
+          {layer.children.map(
+            (childLayer) =>
+              childLayer.type === "div" && (
+                <LayerItem
+                  key={childLayer.id}
+                  layer={childLayer}
+                  onAddLayer={onAddLayer}
+                  onRemoveLayer={onRemoveLayer}
+                  onUpdateName={onUpdateName}
+                  onToggle={onToggle}
+                  onMove={onMove}
+                  depth={depth + 1}
+                />
+              )
+          )}
         </div>
       )}
     </div>

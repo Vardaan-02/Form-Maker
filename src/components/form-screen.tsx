@@ -1,56 +1,41 @@
 "use client";
 
-import { useDebugger } from "@/hooks/use-debugger";
 import { RootState } from "@/store/store";
-import { Layer } from "@/types/Layer";
-import { useSelector } from "react-redux";
-import { LayerPopUp } from "./layer-pop-up";
-
+import { useDispatch, useSelector } from "react-redux";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import codeGenerator from "@/lib/code-genrator";
+import { Copy } from "lucide-react";
+import renderLayers from "@/lib/render-layer";
+import { useDebugger } from "@/hooks/use-debugger";
 export default function FormScreen() {
   const { layers, sidebarWidth } = useSelector(
     (state: RootState) => state.sidebar
   );
 
-  useDebugger<Layer[]>(layers);
+  useDebugger(layers);
 
-  const renderLayers = (layers: Layer[], depth: number = 0): JSX.Element[] => {
-    return layers.map((layer) => {
-      const combinedStyle: React.CSSProperties = {
-        justifyContent: layer.style.justifyContent,
-        alignItems: layer.style.alignItems,
-        padding: layer.style.padding,
-        margin: depth == 0 ? 0 : layer.style.margin,
-        opacity: layer.style.opacity,
-        backgroundColor: layer.style.backgroundColor,
-        borderRadius: layer.style.borderRadius,
-        borderWidth: layer.style.borderWidth,
-        borderColor: layer.style.borderColor,
-        gap: layer.style.gap,
-        width: layer.style.width,
-        height: layer.style.height,
-      };
-
-      return (
-        <div
-          key={layer.id}
-          className={`${
-            layer.isToggled ? "flex-row" : "flex-col"
-          } shadow-xl px-4 py-2 flex gap-4 rounded-md h-full w-full relative border group`}
-          style={combinedStyle}
-        >
-          <LayerPopUp key={layer.id} layerId={layer.id} />
-          {layer.children.length > 0 && renderLayers(layer.children, depth + 1)}
-        </div>
-      );
-    });
-  };
+  const dispatch = useDispatch();
 
   return (
     <div
       className="flex flex-col  p-12"
       style={{ width: `calc(100vw - ${sidebarWidth}px)` }}
     >
-      {renderLayers(layers)}
+      <Tabs defaultValue="preview" className="h-[95%]">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="code">Code</TabsTrigger>
+        </TabsList>
+        <TabsContent value="preview" className="h-full">
+          <div className="h-full w-full">{renderLayers(layers,0,dispatch)}</div>
+        </TabsContent>
+        <TabsContent value="code">
+          <pre className="h-full w-full realtive">
+            <Copy className="absolute right-16 top-28" />
+            {codeGenerator(layers)}
+          </pre>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

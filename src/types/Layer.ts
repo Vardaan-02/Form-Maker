@@ -1,4 +1,5 @@
 export interface Layer {
+  type: string
   id: string;
   name: string;
   isToggled: boolean;
