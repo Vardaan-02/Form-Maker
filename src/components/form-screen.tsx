@@ -15,9 +15,20 @@ export default function FormScreen() {
 
   const renderLayers = (layers: Layer[], depth: number = 0): JSX.Element[] => {
     return layers.map((layer) => {
-      const backgroundColor = `rgb(${255 - depth * 30}, ${255 - depth * 30}, ${
-        255 - depth * 30
-      })`;
+      const combinedStyle: React.CSSProperties = {
+        justifyContent: layer.style.justifyContent,
+        alignItems: layer.style.alignItems,
+        padding: layer.style.padding,
+        margin: depth == 0 ? 0 : layer.style.margin,
+        opacity: layer.style.opacity,
+        backgroundColor: layer.style.backgroundColor,
+        borderRadius: layer.style.borderRadius,
+        borderWidth: layer.style.borderWidth,
+        borderColor: layer.style.borderColor,
+        gap: layer.style.gap,
+        width: layer.style.width,
+        height: layer.style.height,
+      };
 
       return (
         <div
@@ -25,9 +36,9 @@ export default function FormScreen() {
           className={`${
             layer.isToggled ? "flex-row" : "flex-col"
           } shadow-xl px-4 py-2 flex gap-4 rounded-md h-full w-full relative border group`}
-          style={{ backgroundColor }}
+          style={combinedStyle}
         >
-          <LayerPopUp layerId={layer.id}/>
+          <LayerPopUp key={layer.id} layerId={layer.id} />
           {layer.children.length > 0 && renderLayers(layer.children, depth + 1)}
         </div>
       );

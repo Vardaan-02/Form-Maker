@@ -3,20 +3,29 @@ export interface Layer {
   name: string;
   isToggled: boolean;
   children: Layer[];
-  style: {
-    direction?: "row" | "column";
-    justifyContent?: "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly";
-    alignItems?: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
-    padding?: string;
-    margin?: string;
-    backgroundColor?: string;
-    borderRadius?: string;
-    borderWidth?: string;
-    borderColor?: string;
-    boxShadow?: string;
-    opacity?: number;
-  };
   depth: number;
+  style: LayerStyle;
+}
+
+export interface LayerStyle {
+  justifyContent:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
+  alignItems: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
+  padding: string;
+  margin: string;
+  backgroundColor: string;
+  borderRadius: string;
+  borderWidth: string;
+  borderColor: string;
+  opacity: number;
+  gap:string;
+  height:string;
+  width:string;
 }
 
 export interface LayerItemProps {

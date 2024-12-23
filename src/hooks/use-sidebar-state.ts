@@ -10,9 +10,7 @@ export function useSidebarState() {
       name: "Root Layer",
       isToggled: false,
       children: [],
-      style: {
-        direction: "column",
-      },
+      style: {},
       depth: 1,
     },
   ]);
@@ -32,9 +30,7 @@ export function useSidebarState() {
                   name: "Untitled Layer",
                   isToggled: false,
                   children: [],
-                  style: {
-                    direction: "column",
-                  },
+                  style: {},
                   depth: layer.depth + 1,
                 },
               ],

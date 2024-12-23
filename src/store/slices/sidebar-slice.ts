@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Layer } from "@/types/Layer";
+import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
+import { Layer, LayerStyle } from "@/types/Layer";
 import { SidebarState } from "@/types/Sidebar";
+import { hslToHex } from "@/lib/color-conversion";
 
 const initialState: SidebarState = {
   layers: [
@@ -10,7 +11,18 @@ const initialState: SidebarState = {
       isToggled: false,
       children: [],
       style: {
-        direction: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "0rem",
+        margin: "0rem",
+        opacity: 1,
+        backgroundColor: `${hslToHex(0, 0, 90)}`,
+        borderRadius: "0rem",
+        borderWidth: "0px",
+        borderColor: "#000000",
+        gap: "0rem",
+        height: "100%",
+        width: "100%",
       },
       depth: 1,
     },
@@ -27,12 +39,23 @@ const sidebarSlice = createSlice({
         return layers.map((layer) => {
           if (layer.id === action.payload.parentId) {
             layer.children.push({
-              id: layer.id + (layer.children.length + 1),
+              id: nanoid(),
               name: "Untitled Layer",
               isToggled: false,
               children: [],
               style: {
-                direction: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "0rem",
+                margin: "0rem",
+                opacity: 1,
+                backgroundColor: `${hslToHex(0, 0, 90 - layer.depth * 10)}`,
+                borderRadius: "0rem",
+                borderWidth: "0px",
+                borderColor: "#000000",
+                gap: "0rem",
+                height: "100%",
+                width: "100%",
               },
               depth: layer.depth + 1,
             });
@@ -122,6 +145,23 @@ const sidebarSlice = createSlice({
     setSidebarWidth: (state, action: PayloadAction<{ width: number }>) => {
       state.sidebarWidth = action.payload.width;
     },
+    updateLayerStyle: (
+      state,
+      action: PayloadAction<{ layerId: string; style: LayerStyle }>
+    ) => {
+      const updateLayerStyleInChildren = (layers: Layer[]): Layer[] => {
+        return layers.map((layer) => {
+          if (layer.id === action.payload.layerId) {
+            layer.style = action.payload.style;
+          } else if (layer.children.length > 0) {
+            layer.children = updateLayerStyleInChildren(layer.children);
+          }
+          return layer;
+        });
+      };
+
+      state.layers = updateLayerStyleInChildren(state.layers);
+    },
   },
 });
 
@@ -132,6 +172,7 @@ export const {
   toggleLayer,
   moveLayer,
   setSidebarWidth,
+  updateLayerStyle,
 } = sidebarSlice.actions;
 
 export default sidebarSlice.reducer;
