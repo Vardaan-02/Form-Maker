@@ -15,19 +15,21 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LayerItemProps } from "@/types/Layer";
 import { LayerPopUp } from "./layer-pop-up";
+import { useDispatch } from "react-redux";
+import {
+  addLayer,
+  moveLayer,
+  removeLayer,
+  toggleLayer,
+  updateLayerName,
+  updateLayerStyle,
+} from "@/store/slices/sidebar-slice";
 
-export function LayerItem({
-  layer,
-  onAddLayer,
-  onRemoveLayer,
-  onUpdateName,
-  onToggle,
-  onMove,
-  depth = 0,
-}: LayerItemProps) {
+export function LayerItem({ layer }: LayerItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(layer.name);
+
+  const dispatch = useDispatch();
 
   const handleToggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -36,11 +38,19 @@ export function LayerItem({
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
+    dispatch(updateLayerName({ id: layer.id, name: e.target.value }));
+  };
+
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(
+      updateLayerStyle({
+        layerId: layer.id,
+        style: { ...layer.style, label: e.target.value },
+      })
+    );
   };
 
   const handleNameBlur = () => {
-    onUpdateName(layer.id, editedName);
     setIsEditing(false);
   };
 
@@ -54,7 +64,7 @@ export function LayerItem({
     <div>
       <div
         className="group mb-2 flex items-center"
-        style={{ marginLeft: `${depth * 20}px` }}
+        style={{ marginLeft: `${layer.depth * 20}px` }}
       >
         {layer.children.length > 0 && (
           <button onClick={handleToggleExpand} className="mr-2">
@@ -69,14 +79,16 @@ export function LayerItem({
           <Input
             value={
               layer.type === "div"
-                ? editedName
+                ? layer.name
                 : layer.type === "text-input"
                 ? layer.style.label
                 : layer.type === "button"
                 ? layer.style.label
                 : ""
             }
-            onChange={handleNameChange}
+            onChange={
+              layer.type === "div" ? handleNameChange : handleLabelChange
+            }
             onBlur={handleNameBlur}
             onKeyDown={handleNameKeyDown}
             className="mr-2 w-40"
@@ -85,7 +97,7 @@ export function LayerItem({
         ) : (
           <span className="mr-2 w-40 truncate">
             {layer.type === "div"
-              ? editedName
+              ? layer.name
               : layer.type === "text-input"
               ? layer.style.label
               : layer.type === "button"
@@ -99,17 +111,19 @@ export function LayerItem({
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            onClick={() => onAddLayer(layer.id)}
+            onClick={() =>
+              dispatch(addLayer({ parentId: layer.id, type: "div" }))
+            }
             title="Add sub-layer"
           >
             <Plus size={16} />
           </Button>
-          {depth > 0 && (
+          {layer.depth > 1 && (
             <Button
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => onRemoveLayer(layer.id)}
+              onClick={() => dispatch(removeLayer({ id: layer.id }))}
               title="Remove layer"
             >
               <Minus size={16} />
@@ -128,7 +142,9 @@ export function LayerItem({
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            onClick={() => onMove(layer.id, "up")}
+            onClick={() =>
+              dispatch(moveLayer({ id: layer.id, direction: "up" }))
+            }
             title="Move up"
           >
             <ArrowUp size={16} />
@@ -137,7 +153,9 @@ export function LayerItem({
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            onClick={() => onMove(layer.id, "down")}
+            onClick={() =>
+              dispatch(moveLayer({ id: layer.id, direction: "down" }))
+            }
             title="Move down"
           >
             <ArrowDown size={16} />
@@ -145,26 +163,17 @@ export function LayerItem({
           {layer.type === "div" && (
             <Switch
               checked={layer.isToggled}
-              onCheckedChange={() => onToggle(layer.id)}
+              onCheckedChange={() => dispatch(toggleLayer({ id: layer.id }))}
               title="Toggle layer"
             />
           )}
-          <LayerPopUp key={layer.id} layerId={layer.id} />
+          <LayerPopUp key={layer.id} layer={layer} />
         </div>
       </div>
       {isExpanded && layer.children.length > 0 && (
         <div>
           {layer.children.map((childLayer) => (
-            <LayerItem
-              key={childLayer.id}
-              layer={childLayer}
-              onAddLayer={onAddLayer}
-              onRemoveLayer={onRemoveLayer}
-              onUpdateName={onUpdateName}
-              onToggle={onToggle}
-              onMove={onMove}
-              depth={depth + 1}
-            />
+            <LayerItem key={childLayer.id} layer={childLayer} />
           ))}
         </div>
       )}

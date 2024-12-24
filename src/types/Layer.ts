@@ -34,10 +34,4 @@ export interface LayerStyle {
 
 export interface LayerItemProps {
   layer: Layer;
-  onAddLayer: (parentId: string) => void;
-  onRemoveLayer: (id: string) => void;
-  onUpdateName: (id: string, name: string) => void;
-  onToggle: (id: string) => void;
-  onMove: (id: string, direction: "up" | "down") => void;
-  depth?: number;
 }

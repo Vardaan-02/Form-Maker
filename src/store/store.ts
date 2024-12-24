@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import sidebarReducer from "@/store/slices/sidebar-slice";
+import borderSlice from "./slices/border-slice";
 
 export const store = configureStore({
   reducer: {
     sidebar: sidebarReducer,
+    border: borderSlice,
   },
 });
 

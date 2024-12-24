@@ -10,7 +10,8 @@ import { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 const RenderLayers = (
   layers: Layer[],
   depth: number = 0,
-  dispatch: Dispatch<UnknownAction>
+  dispatch: Dispatch<UnknownAction>,
+  showBorder: boolean,
 ): JSX.Element[] => {
   return layers.map((layer) => {
     const combinedStyle: React.CSSProperties = {
@@ -21,7 +22,7 @@ const RenderLayers = (
       opacity: layer.style.opacity,
       backgroundColor: layer.style.backgroundColor,
       borderRadius: layer.style.borderRadius,
-      borderWidth: layer.style.borderWidth,
+      borderWidth: showBorder ? layer.style.borderWidth : "0px",
       borderColor: layer.style.borderColor,
       gap: layer.style.gap,
       width: layer.style.width,
@@ -50,7 +51,7 @@ const RenderLayers = (
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
-          {layer.children.length > 0 && RenderLayers(layer.children, depth + 1,dispatch)}
+          {layer.children.length > 0 && RenderLayers(layer.children, depth + 1,dispatch,showBorder)}
         </div>
       );
     else if (layer.type === "text-input")

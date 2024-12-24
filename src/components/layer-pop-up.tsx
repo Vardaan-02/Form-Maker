@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Settings } from "lucide-react";
 import {
   Dialog,
@@ -23,115 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { RootState } from "@/store/store";
-import { updateLayerStyle } from "@/store/slices/sidebar-slice";
+
 import ColorPicker from "./ui/color-picker/color-picker";
-import { Layer, LayerStyle } from "@/types/Layer";
-import { hslToHex } from "@/lib/color-conversion";
+import { Layer } from "@/types/Layer";
+import { updateLayerStyle } from "@/store/slices/sidebar-slice";
+import UnitPopUp from "./unit-pop-up";
 
-const unitOptions = ["px", "em", "rem", "%", "vw", "vh"];
-
-const defaultStyle: LayerStyle = {
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "0rem",
-  margin: "0rem",
-  opacity: 1,
-  backgroundColor: `${hslToHex(0, 0, 90)}`,
-  borderRadius: "0rem",
-  borderWidth: "0px",
-  borderColor: "#000000",
-  gap: "0rem",
-  height: "100%",
-  width: "100%",
-};
-
-const findLayerById = (layers: Layer[], layerId: string): Layer | undefined => {
-  for (const layer of layers) {
-    if (layer.id === layerId) {
-      return layer;
-    }
-    if (layer.children.length > 0) {
-      const foundLayer = findLayerById(layer.children, layerId);
-      if (foundLayer) return foundLayer;
-    }
-  }
-  return undefined;
-};
-
-export function LayerPopUp({ layerId }: { layerId: string }) {
+export function LayerPopUp({ layer }: { layer: Layer }) {
   const dispatch = useDispatch();
-  const layer = useSelector((state: RootState) =>
-    findLayerById(state.sidebar.layers, layerId)
-  );
-
-  const [style, setStyle] = useState<LayerStyle>(layer?.style ?? defaultStyle);
-  const [units, setUnits] = useState({
-    height: "%",
-    width: "%",
-    padding: "px",
-    margin: "px",
-    borderRadius: "px",
-    borderWidth: "px",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (layer) {
-      setStyle(layer.style);
-      const extractedUnits = {
-        height: (layer.style.height || "").replace(/^-?\d*\.?\d+/, "") || "px",
-        width: (layer.style.width || "").replace(/^-?\d*\.?\d+/, "") || "px",
-        padding:
-          (layer.style.padding || "").replace(/^-?\d*\.?\d+/, "") || "px",
-        margin: (layer.style.margin || "").replace(/^-?\d*\.?\d+/, "") || "px",
-        borderRadius:
-          (layer.style.borderRadius || "").replace(/^-?\d*\.?\d+/, "") || "px",
-        borderWidth:
-          (layer.style.borderWidth || "").replace(/^-?\d*\.?\d+/, "") || "px",
-      };
-      setUnits(extractedUnits);
-    }
-  }, [layer]);
-
-  const handleStyleChange = (key: string, value: string | number) => {
-    const validatedValue = value;
-    let error = "";
-
-    if (
-      [
-        "width",
-        "height",
-        "padding",
-        "margin",
-        "borderRadius",
-        "borderWidth",
-      ].includes(key)
-    ) {
-      if (validatedValue === "") {
-        error = `Invalid ${key}. Please use a number.`;
-      }
-    }
-
-    setStyle((prevStyle) => ({ ...prevStyle, [key]: validatedValue }));
-    setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
-  };
-
-  const handleUnitChange = (key: string, unit: string) => {
-    setUnits((prevUnits) => ({ ...prevUnits, [key]: unit }));
-    const numericValue = parseFloat(style[key as keyof typeof style] as string);
-    if (!isNaN(numericValue)) {
-      handleStyleChange(key, `${numericValue}${unit}`);
-    }
-  };
-
-  const handleSave = () => {
-    if (Object.values(errors).every((error) => error === "")) {
-      dispatch(updateLayerStyle({ layerId, style }));
-    }
-  };
-
-  if (!layer) return null;
 
   return (
     <Dialog>
@@ -156,9 +54,14 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
                 Justify Content
               </Label>
               <Select
-                value={style.justifyContent as string}
-                onValueChange={(value) =>
-                  handleStyleChange("justifyContent", value)
+                value={layer.style.justifyContent}
+                onValueChange={(value: "center") =>
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, justifyContent: value },
+                    })
+                  )
                 }
               >
                 <SelectTrigger className="col-span-3">
@@ -179,9 +82,13 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
                 Align Items
               </Label>
               <Select
-                value={style.alignItems as string}
-                onValueChange={(value) =>
-                  handleStyleChange("alignItems", value)
+                onValueChange={(value: "center") =>
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, alignItems: value },
+                    })
+                  )
                 }
               >
                 <SelectTrigger className="col-span-3">
@@ -196,6 +103,23 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="backgroundColor" className="text-right">
+                Placeholder
+              </Label>
+              <Input
+                value={layer.style.placeholder}
+                className="w-full"
+                onChange={(e) =>
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, placeholder: e.target.value },
+                    })
+                  )
+                }
+              />
+            </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="backgroundColor" className="text-right">
                 Background Color
@@ -203,7 +127,12 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
               <ColorPicker
                 _color={layer.style.backgroundColor}
                 onChange={(color) =>
-                  handleStyleChange("backgroundColor", color)
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, backgroundColor: color },
+                    })
+                  )
                 }
               />
             </div>
@@ -213,7 +142,14 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
               </Label>
               <ColorPicker
                 _color={layer.style.borderColor}
-                onChange={(color) => handleStyleChange("borderColor", color)}
+                onChange={(color) =>
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, borderColor: color },
+                    })
+                  )
+                }
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -225,71 +161,44 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
                 min={0}
                 max={1}
                 step={0.01}
-                value={[(style.opacity as number) || 1]}
-                onValueChange={([value]) => handleStyleChange("opacity", value)}
+                value={[(layer.style.opacity as number) || 1]}
+                onValueChange={([value]) =>
+                  dispatch(
+                    updateLayerStyle({
+                      layerId: layer.id,
+                      style: { ...layer.style, opacity: value },
+                    })
+                  )
+                }
                 className="col-span-3"
               />
             </div>
           </div>
           <div className="space-y-4">
-            {/* Right side inputs */}
-            {[
-              "margin",
-              "borderRadius",
-              "borderWidth",
-              "width",
-              "height",
-              "padding",
-            ].map((prop) => (
-              <div key={prop} className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor={prop} className="text-right capitalize">
-                  {prop}
-                </Label>
-                <div className="col-span-2">
-                  <Input
-                    id={prop}
-                    value={
-                      (style[prop as keyof typeof style] as string)?.replace(
-                        /[^\d.-]/g,
-                        ""
-                      ) || ""
-                    }
-                    onChange={(e) => handleStyleChange(prop, e.target.value)}
-                    aria-invalid={errors[prop] ? "true" : "false"}
-                    aria-describedby={`${prop}-error`}
-                  />
-                  {errors[prop] && (
-                    <p id={`${prop}-error`} className="text-red-500 text-sm">
-                      {errors[prop]}
-                    </p>
-                  )}
-                </div>
-                <Select
-                  value={units[prop as keyof typeof units]}
-                  onValueChange={(value) => handleUnitChange(prop, value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {unitOptions.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
+            <UnitPopUp name="Gap" layer={layer} prop={layer.style.gap} />
+            <UnitPopUp
+              name="Padding"
+              layer={layer}
+              prop={layer.style.padding}
+            />
+            <UnitPopUp name="Margin" layer={layer} prop={layer.style.margin} />
+            <UnitPopUp
+              name="Border Radius"
+              layer={layer}
+              prop={layer.style.borderRadius}
+            />
+            <UnitPopUp
+              name="Border Width"
+              layer={layer}
+              prop={layer.style.borderWidth}
+            />
+            <UnitPopUp name="Height" layer={layer} prop={layer.style.height} />
+            <UnitPopUp name="Width" layer={layer} prop={layer.style.width} />
           </div>
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <button
-              className="px-4 py-3 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleSave}
-              disabled={Object.values(errors).some((error) => error !== "")}
-            >
+            <button className="px-4 py-3 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
               Save changes
             </button>
           </DialogClose>
