@@ -9,24 +9,27 @@ export interface Layer {
 }
 
 export interface LayerStyle {
-  justifyContent:
+  justifyContent?:
     | "flex-start"
     | "flex-end"
     | "center"
     | "space-between"
     | "space-around"
     | "space-evenly";
-  alignItems: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
-  padding: string;
-  margin: string;
-  backgroundColor: string;
-  borderRadius: string;
-  borderWidth: string;
-  borderColor: string;
-  opacity: number;
-  gap:string;
-  height:string;
-  width:string;
+  alignItems?: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
+  padding?: string;
+  margin?: string;
+  backgroundColor?: string;
+  borderRadius?: string;
+  borderWidth?: string;
+  borderColor?: string;
+  opacity?: number;
+  gap?:string;
+  height?:string;
+  width?:string;
+  placeholder?:string;
+  label?:string;
+  id?:string;
 }
 
 export interface LayerItemProps {

@@ -25,12 +25,12 @@ import PopUp from "./pop-up";
 type ColorFormat = "hex" | "rgb" | "hsl" | "cmyk" | "wheel";
 
 interface ColorPickerProps {
-  _color: string;
+  _color?: string;
   setColor?: React.Dispatch<SetStateAction<string>>;
   onChange?: (color: string) => void;
 }
 
-const ColorPicker: React.FC<ColorPickerProps> = ({ _color, onChange }) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({ _color='dddddd', onChange }) => {
   const [color, setColor] = useState<string>(_color);
   const [format, setFormat] = useState<ColorFormat>("hex");
   const [rgb, setRgb] = useState<[number, number, number]>(hexToRgb(_color));

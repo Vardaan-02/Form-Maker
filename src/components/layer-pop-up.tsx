@@ -136,7 +136,7 @@ export function LayerPopUp({ layerId }: { layerId: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="absolute -right-4 -top-4 hover:bg-secondary transition-all p-2 rounded-full opacity-0 group-hover:opacity-100">
+        <div className=" hover:bg-secondary transition-all p-2 rounded-full ">
           <Settings className="h-6 w-6" />
         </div>
       </DialogTrigger>

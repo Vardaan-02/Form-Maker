@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LayerItemProps } from "@/types/Layer";
+import { LayerPopUp } from "./layer-pop-up";
 
 export function LayerItem({
   layer,
@@ -66,7 +67,15 @@ export function LayerItem({
         )}
         {isEditing ? (
           <Input
-            value={editedName}
+            value={
+              layer.type === "div"
+                ? editedName
+                : layer.type === "text-input"
+                ? layer.style.label
+                : layer.type === "button"
+                ? layer.style.label
+                : ""
+            }
             onChange={handleNameChange}
             onBlur={handleNameBlur}
             onKeyDown={handleNameKeyDown}
@@ -74,8 +83,17 @@ export function LayerItem({
             autoFocus
           />
         ) : (
-          <span className="mr-2 w-40 truncate">{layer.name}</span>
+          <span className="mr-2 w-40 truncate">
+            {layer.type === "div"
+              ? editedName
+              : layer.type === "text-input"
+              ? layer.style.label
+              : layer.type === "button"
+              ? layer.style.label
+              : ""}
+          </span>
         )}
+
         <div className="flex items-center space-x-1">
           <Button
             variant="outline"
@@ -124,30 +142,30 @@ export function LayerItem({
           >
             <ArrowDown size={16} />
           </Button>
-          <Switch
-            checked={layer.isToggled}
-            onCheckedChange={() => onToggle(layer.id)}
-            title="Toggle layer"
-          />
+          {layer.type === "div" && (
+            <Switch
+              checked={layer.isToggled}
+              onCheckedChange={() => onToggle(layer.id)}
+              title="Toggle layer"
+            />
+          )}
+          <LayerPopUp key={layer.id} layerId={layer.id} />
         </div>
       </div>
       {isExpanded && layer.children.length > 0 && (
         <div>
-          {layer.children.map(
-            (childLayer) =>
-              childLayer.type === "div" && (
-                <LayerItem
-                  key={childLayer.id}
-                  layer={childLayer}
-                  onAddLayer={onAddLayer}
-                  onRemoveLayer={onRemoveLayer}
-                  onUpdateName={onUpdateName}
-                  onToggle={onToggle}
-                  onMove={onMove}
-                  depth={depth + 1}
-                />
-              )
-          )}
+          {layer.children.map((childLayer) => (
+            <LayerItem
+              key={childLayer.id}
+              layer={childLayer}
+              onAddLayer={onAddLayer}
+              onRemoveLayer={onRemoveLayer}
+              onUpdateName={onUpdateName}
+              onToggle={onToggle}
+              onMove={onMove}
+              depth={depth + 1}
+            />
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { LayerPopUp } from "@/components/layer-pop-up";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, LabelInputContainer } from "@/components/ui/label";
@@ -33,7 +32,6 @@ const RenderLayers = (
       e.preventDefault();
       e.stopPropagation();
       const inputType = e.dataTransfer.getData("inputType");
-      console.log(`Dropped ${inputType} into layer ${layer.id}`);
       dispatch(addLayer({ parentId: layer.id, type: inputType }));
     };
 
@@ -52,19 +50,18 @@ const RenderLayers = (
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
-          <LayerPopUp key={layer.id} layerId={layer.id} />
           {layer.children.length > 0 && RenderLayers(layer.children, depth + 1,dispatch)}
         </div>
       );
     else if (layer.type === "text-input")
       return (
         <LabelInputContainer className="cursor-pointer" key={layer.id}>
-          <Label htmlFor="text-input">
-            Label
+          <Label htmlFor={layer.style.id}>
+            {layer.style.label}
           </Label>
           <Input
-            id="text-input"
-            placeholder="Text Input"
+            id={layer.style.id}
+            placeholder={layer.style.placeholder}
             type="text"
           />
         </LabelInputContainer>
@@ -72,7 +69,7 @@ const RenderLayers = (
     else if (layer.type === "button") {
       return (
         <Button key={layer.id} className={`cursor-pointer`}>
-          Submit
+          {layer.style.label}
         </Button>
       );
     } else return <div key={layer.id}>{layer.id}</div>;

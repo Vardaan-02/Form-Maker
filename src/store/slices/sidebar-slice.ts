@@ -1,7 +1,13 @@
 import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
-import { Layer, LayerStyle } from "@/types/Layer";
+import { LayerStyle } from "@/types/Layer";
 import { SidebarState } from "@/types/Sidebar";
 import { hslToHex } from "@/lib/color-conversion";
+import { addToChildren } from "./sidebar-slice/add-to-children";
+import { removeFromChildren } from "./sidebar-slice/remove-from-children";
+import { toggleInChildren } from "./sidebar-slice/toggle-layer";
+import { updateInChildren } from "./sidebar-slice/update-in-children";
+import { moveInChildren } from "./sidebar-slice/move-layer";
+import { updateLayerStyleInChildren } from "./sidebar-slice/update-layer-style-in-children";
 
 const initialState: SidebarState = {
   layers: [
@@ -14,16 +20,19 @@ const initialState: SidebarState = {
       style: {
         justifyContent: "center",
         alignItems: "center",
-        padding: "0rem",
+        padding: "2rem",
         margin: "0rem",
         opacity: 1,
         backgroundColor: `${hslToHex(0, 0, 100)}`,
         borderRadius: "0px",
         borderWidth: "1px",
         borderColor: "#dddddd",
-        gap: "0rem",
+        gap: "1rem",
         height: "100%",
         width: "100%",
+        placeholder: "placeholder",
+        label: "Label",
+        id: nanoid(),
       },
       depth: 1,
     },
@@ -39,113 +48,25 @@ const sidebarSlice = createSlice({
       state,
       action: PayloadAction<{ parentId: string; type: string }>
     ) => {
-      const addToChildren = (layers: Layer[]): Layer[] => {
-        return layers.map((layer) => {
-          if (layer.id === action.payload.parentId) {
-            layer.children.push({
-              type: action.payload.type,
-              id: nanoid(),
-              name: "Untitled Layer",
-              isToggled: false,
-              children: [],
-              style: {
-                justifyContent: "center",
-                alignItems: "center",
-                padding: "0rem",
-                margin: "0rem",
-                opacity: 1,
-                backgroundColor: `${hslToHex(0, 0, 100)}`,
-                borderRadius: "0rem",
-                borderWidth: "1px",
-                borderColor: "#dddddd",
-                gap: "0rem",
-                height: "100%",
-                width: "100%",
-              },
-              depth: layer.depth + 1,
-            });
-          } else if (layer.children.length > 0) {
-            layer.children = addToChildren(layer.children);
-          }
-          return layer;
-        });
-      };
-
-      state.layers = addToChildren(state.layers);
+      state.layers = addToChildren(state.layers, action);
     },
     removeLayer: (state, action: PayloadAction<{ id: string }>) => {
-      const removeFromChildren = (layers: Layer[]): Layer[] => {
-        return layers
-          .map((layer) => {
-            if (layer.children.length > 0) {
-              layer.children = removeFromChildren(layer.children);
-            }
-            return layer;
-          })
-          .filter((layer) => layer.id !== action.payload.id);
-      };
-
-      state.layers = removeFromChildren(state.layers);
+      state.layers = removeFromChildren(state.layers, action);
     },
     updateLayerName: (
       state,
       action: PayloadAction<{ id: string; name: string }>
     ) => {
-      const updateInChildren = (layers: Layer[]): Layer[] => {
-        return layers.map((layer) => {
-          if (layer.id === action.payload.id) {
-            layer.name = action.payload.name || "Untitled Layer";
-          } else if (layer.children.length > 0) {
-            layer.children = updateInChildren(layer.children);
-          }
-          return layer;
-        });
-      };
-
-      state.layers = updateInChildren(state.layers);
+      state.layers = updateInChildren(state.layers, action);
     },
     toggleLayer: (state, action: PayloadAction<{ id: string }>) => {
-      const toggleInChildren = (layers: Layer[]): Layer[] => {
-        return layers.map((layer) => {
-          if (layer.id === action.payload.id) {
-            layer.isToggled = !layer.isToggled;
-          } else if (layer.children.length > 0) {
-            layer.children = toggleInChildren(layer.children);
-          }
-          return layer;
-        });
-      };
-
-      state.layers = toggleInChildren(state.layers);
+      state.layers = toggleInChildren(state.layers, action);
     },
     moveLayer: (
       state,
       action: PayloadAction<{ id: string; direction: "up" | "down" }>
     ) => {
-      const moveInChildren = (layers: Layer[]): Layer[] => {
-        const index = layers.findIndex(
-          (layer) => layer.id === action.payload.id
-        );
-        if (index !== -1) {
-          const newIndex =
-            action.payload.direction === "up"
-              ? Math.max(0, index - 1)
-              : Math.min(layers.length - 1, index + 1);
-          if (index !== newIndex) {
-            const [movedLayer] = layers.splice(index, 1);
-            layers.splice(newIndex, 0, movedLayer);
-          }
-          return [...layers];
-        }
-        return layers.map((layer) => {
-          if (layer.children.length > 0) {
-            layer.children = moveInChildren(layer.children);
-          }
-          return layer;
-        });
-      };
-
-      state.layers = moveInChildren(state.layers);
+      state.layers = moveInChildren(state.layers, action);
     },
     setSidebarWidth: (state, action: PayloadAction<{ width: number }>) => {
       state.sidebarWidth = action.payload.width;
@@ -154,18 +75,7 @@ const sidebarSlice = createSlice({
       state,
       action: PayloadAction<{ layerId: string; style: LayerStyle }>
     ) => {
-      const updateLayerStyleInChildren = (layers: Layer[]): Layer[] => {
-        return layers.map((layer) => {
-          if (layer.id === action.payload.layerId) {
-            layer.style = action.payload.style;
-          } else if (layer.children.length > 0) {
-            layer.children = updateLayerStyleInChildren(layer.children);
-          }
-          return layer;
-        });
-      };
-
-      state.layers = updateLayerStyleInChildren(state.layers);
+      state.layers = updateLayerStyleInChildren(state.layers, action);
     },
   },
 });
