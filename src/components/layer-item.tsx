@@ -77,15 +77,7 @@ export function LayerItem({ layer }: LayerItemProps) {
         )}
         {isEditing ? (
           <Input
-            value={
-              layer.type === "div"
-                ? layer.name
-                : layer.type === "text-input"
-                ? layer.style.label
-                : layer.type === "button"
-                ? layer.style.label
-                : ""
-            }
+            value={layer.type === "div" ? layer.name : layer.style.label}
             onChange={
               layer.type === "div" ? handleNameChange : handleLabelChange
             }
@@ -96,28 +88,24 @@ export function LayerItem({ layer }: LayerItemProps) {
           />
         ) : (
           <span className="mr-2 w-40 truncate">
-            {layer.type === "div"
-              ? layer.name
-              : layer.type === "text-input"
-              ? layer.style.label
-              : layer.type === "button"
-              ? layer.style.label
-              : ""}
+            {layer.type === "div" ? layer.name : layer.style.label}
           </span>
         )}
 
         <div className="flex items-center space-x-1">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() =>
-              dispatch(addLayer({ parentId: layer.id, type: "div" }))
-            }
-            title="Add sub-layer"
-          >
-            <Plus size={16} />
-          </Button>
+          {layer.type === "div" && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() =>
+                dispatch(addLayer({ parentId: layer.id, type: "div" }))
+              }
+              title="Add sub-layer"
+            >
+              <Plus size={16} />
+            </Button>
+          )}
           {layer.depth > 1 && (
             <Button
               variant="outline"
