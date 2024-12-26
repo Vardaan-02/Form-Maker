@@ -21,7 +21,8 @@ const codeGenerator = (
         layer.style.alignItems &&
           `items-${layer.style.alignItems.replace("flex-", "")}`,
         layer.style.padding && `p-[${layer.style.padding}]`,
-        layer.style.marginX && depth > 0 ? `m-[${layer.style.marginX}]` : "", // fix here margin change
+        layer.style.marginX && depth > 0 ? `mx-[${layer.style.marginX}]` : "", 
+        layer.style.marginY && depth > 0 ? `my-[${layer.style.marginY}]` : "", 
         layer.style.backgroundColor && `bg-[${layer.style.backgroundColor}]`,
         layer.style.borderRadius && `rounded-[${layer.style.borderRadius}]`,
         codeBorder

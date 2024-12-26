@@ -32,7 +32,7 @@ export default function Sidebar() {
 
   return (
     <motion.div
-      className="fixed left-0 top-0 h-full bg-white shadow-lg"
+      className="fixed left-0 top-0 h-full bg-white shadow-lg no-scrollbar"
       style={{ width: sidebarWidth }}
     >
       <motion.div

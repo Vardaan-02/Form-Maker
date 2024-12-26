@@ -9,7 +9,7 @@ export default function DraggableComponent() {
   };
 
   return (
-    <div className="h-full p-4 overflow-y-auto space-y-8">
+    <div className="h-full p-4 space-y-8 no-scrollbar overflow-scroll">
       {components.map((input) => {
         return (
           <div

@@ -26,7 +26,10 @@ const RenderLayers = (
       justifyContent: layer.style.justifyContent,
       alignItems: layer.style.alignItems,
       padding: layer.style.padding,
-      margin: depth == 0 ? 0 : layer.style.marginY, //change here margin x aur y kiya hai
+      marginTop: depth == 0 ? 0 : layer.style.marginY,
+      marginBottom: depth == 0 ? 0 : layer.style.marginY,
+      marginLeft: depth == 0 ? 0 : layer.style.marginX,
+      marginRight: depth == 0 ? 0 : layer.style.marginX,
       opacity: layer.style.opacity,
       backgroundColor: layer.style.backgroundColor,
       borderRadius: layer.style.borderRadius,

@@ -4,7 +4,6 @@ import { RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import codeGenerator from "@/lib/code-genrator";
-import { Copy } from "lucide-react";
 import renderLayers from "@/lib/render-layer";
 import { useDebugger } from "@/hooks/use-debugger";
 export default function FormScreen() {
@@ -36,10 +35,11 @@ export default function FormScreen() {
           </div>
         </TabsContent>
         <TabsContent value="code">
-          <pre className="h-full w-full realtive">
-            <Copy className="absolute right-16 top-28" />
-            {codeGenerator(layers, 1, codeBorder)}
-          </pre>
+          <div className="mt-12 p-8 bg-secondary rounded-md shadow-xl">
+            <pre className="h-full w-full realtive overflow-x-scroll no-scrollbar ">
+              {codeGenerator(layers, 1, codeBorder)}
+            </pre>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
