@@ -148,7 +148,7 @@ export function LayerItem({ layer }: LayerItemProps) {
           >
             <ArrowDown size={16} />
           </Button>
-          {layer.type === "div" && (
+          {(layer.type === "div" || layer.type==="radio-input") && (
             <Switch
               checked={layer.isToggled}
               onCheckedChange={() => dispatch(toggleLayer({ id: layer.id }))}

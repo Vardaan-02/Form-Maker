@@ -21,7 +21,7 @@ const codeGenerator = (
         layer.style.alignItems &&
           `items-${layer.style.alignItems.replace("flex-", "")}`,
         layer.style.padding && `p-[${layer.style.padding}]`,
-        layer.style.margin && depth > 0 ? `m-[${layer.style.margin}]` : "",
+        layer.style.marginX && depth > 0 ? `m-[${layer.style.marginX}]` : "", // fix here margin change
         layer.style.backgroundColor && `bg-[${layer.style.backgroundColor}]`,
         layer.style.borderRadius && `rounded-[${layer.style.borderRadius}]`,
         codeBorder
@@ -41,6 +41,18 @@ const codeGenerator = (
           ? codeGenerator(layer.children, depth + 1, codeBorder)
           : "";
 
+      const numberOfGroups = Math.ceil(
+        (layer.style.otpBox ?? 6) /
+          (layer.style.optSepratorGap
+            ? layer.style.optSepratorGap > 0
+              ? layer.style.optSepratorGap
+              : 1
+            : 1)
+      );
+
+      let lastSlot = (layer.style.otpBox ?? 6) % numberOfGroups;
+      if (lastSlot === 0) lastSlot = layer.style.optSepratorGap ?? 2;
+
       if (layer.type === "div")
         return `${indent}<div className="${tailwindClasses}">\n${childrenCode}\n${indent}</div>`;
       else if (layer.type === "text-input")
@@ -50,39 +62,68 @@ const codeGenerator = (
       } else if (layer.type === "file-upload") {
         return `${indent}<LabelInputContainer className="cursor-pointer">\n${indent}  <Label htmlFor="${layer.style.id}" className="cursor-pointer">\n${indent}    ${layer.style.label}\n${indent}  </Label>\n${indent}  <Input id="${layer.style.id}" type="file"/>\n${indent}</LabelInputContainer>`;
       } else if (layer.type === "input-otp") {
-        return `${indent}<LabelInputContainer className="cursor-pointer">\n${indent}  <Label htmlFor="${layer.style.id}" className="cursor-pointer">\n${indent}    ${layer.style.label}\n${indent}  </Label>\n${indent}  <InputOTP maxLength={6}>
-        <InputOTPGroup>
-          <InputOTPSlot index={0} />
-          <InputOTPSlot index={1} />
-        </InputOTPGroup>
-        <InputOTPSeparator />
-        <InputOTPGroup>
-          <InputOTPSlot index={2} />
-          <InputOTPSlot index={3} />
-        </InputOTPGroup>
-        <InputOTPSeparator />
-        <InputOTPGroup>
-          <InputOTPSlot index={4} />
-          <InputOTPSlot index={5} />
-        </InputOTPGroup>
-      </InputOTP>\n${indent}</LabelInputContainer>`;
+        return `    <LabelInputContainer key={layer.id}>
+      <Label htmlFor={layer.style.id}>${layer.style.label}</Label>
+      <InputOTP maxLength=${layer.style.otpBox ?? 6}>
+        ${Array.from({ length: numberOfGroups })
+          .map((_, index1) => {
+            return `<div key=${index1} className="flex justify-center items-center">
+          <InputOTPGroup>
+            ${Array.from({
+              length:
+                index1 === numberOfGroups - 1
+                  ? lastSlot
+                  : layer.style.optSepratorGap ?? 2,
+            })
+              .map((_, index2) => {
+                return `<InputOTPSlot
+                index=${index1 * (layer.style.optSepratorGap ?? 2) + index2}
+                key=${
+                  index1 * (layer.style.optSepratorGap ?? 2) + index2
+                }/>\n           `;
+              })
+              .join("")}
+          </InputOTPGroup>
+          ${
+            index1 <
+            Math.ceil(
+              (layer.style.otpBox ?? 6) / (layer.style.optSepratorGap ?? 2)
+            ) -
+              1
+              ? `<InputOTPSeparator />`
+              : ""
+          }
+        </div>\n        `;
+          })
+          .join("")}
+  </InputOTP>
+</LabelInputContainer>`;
       } else if (layer.type === "combo-box") {
         return `${indent}<LabelInputContainer className="cursor-pointer">\n${indent}  <Label htmlFor="${layer.style.id}" className="cursor-pointer">\n${indent}    ${layer.style.label}\n${indent}  </Label>\n${indent}  <Combobox setValue={() => {}} />\n${indent}</LabelInputContainer>`;
       } else if (layer.type === "radio-input") {
-        return `${indent}<LabelInputContainer className="cursor-pointer">\n${indent}  <Label htmlFor="${layer.style.id}" className="cursor-pointer">\n${indent}    ${layer.style.label}\n${indent}  </Label>\n${indent}  <RadioGroup defaultValue="comfortable">
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="default" id="r1" />
-          <Label htmlFor="r1">Option 1</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="comfortable" id="r2" />
-          <Label htmlFor="r2">Option 2</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="compact" id="r3" />
-          <Label htmlFor="r3">Option 3</Label>
-        </div>
-      </RadioGroup>\n${indent}</LabelInputContainer>`;
+        return `    <LabelInputContainer class="cursor-pointer" key="${
+          layer.id
+        }">
+      <Label htmlFor="file-upload" class="cursor-pointer">
+        ${layer.style.label}
+      </Label>
+      <RadioGroup defaultValue="0" className="${`${layer.isToggled && "flex flex-wrap gap-8"}`}">
+        ${Array.from({ length: layer.style.radioOptions ?? 3 })
+          .map((_, index) => {
+            return `<div class="flex items-center space-x-2" key="${index}">
+          <RadioGroupItem value="${index}" id="radio-${index}" />
+          <Label htmlFor="radio-${index}">
+            ${
+              layer.style.radioOptionsName
+                ? layer.style.radioOptionsName[index]
+                : `Option ${index + 1}`
+            }
+          </Label>
+        </div>\n        `;
+          })
+          .join("")}
+      </RadioGroup>
+    </LabelInputContainer>`;
       }
     })
     .join("\n");

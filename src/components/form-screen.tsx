@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import codeGenerator from "@/lib/code-genrator";
 import { Copy } from "lucide-react";
 import renderLayers from "@/lib/render-layer";
+import { useDebugger } from "@/hooks/use-debugger";
 export default function FormScreen() {
   const { layers, sidebarWidth } = useSelector(
     (state: RootState) => state.sidebar
@@ -14,6 +15,8 @@ export default function FormScreen() {
   const { showBorder, codeBorder } = useSelector(
     (state: RootState) => state.border
   );
+
+  useDebugger(layers);
 
   const dispatch = useDispatch();
 

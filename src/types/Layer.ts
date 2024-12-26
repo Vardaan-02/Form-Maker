@@ -1,3 +1,5 @@
+import { ComboboxOption } from "@/components/ui/combo-box";
+
 export interface Layer {
   type: string
   id: string;
@@ -18,7 +20,8 @@ export interface LayerStyle {
     | "space-evenly";
   alignItems?: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
   padding?: string;
-  margin?: string;
+  marginY?: string;
+  marginX?: string;
   backgroundColor?: string;
   borderRadius?: string;
   borderWidth?: string;
@@ -30,6 +33,11 @@ export interface LayerStyle {
   placeholder?:string;
   label?:string;
   id?:string;
+  otpBox?:number;
+  optSepratorGap?:number;
+  comboboxOptions?:ComboboxOption[];
+  radioOptions?:number;
+  radioOptionsName?:string[];
 }
 
 export interface LayerItemProps {

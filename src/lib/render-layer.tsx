@@ -26,7 +26,7 @@ const RenderLayers = (
       justifyContent: layer.style.justifyContent,
       alignItems: layer.style.alignItems,
       padding: layer.style.padding,
-      margin: depth == 0 ? 0 : layer.style.margin,
+      margin: depth == 0 ? 0 : layer.style.marginY, //change here margin x aur y kiya hai
       opacity: layer.style.opacity,
       backgroundColor: layer.style.backgroundColor,
       borderRadius: layer.style.borderRadius,
@@ -80,28 +80,59 @@ const RenderLayers = (
       return (
         <LabelInputContainer key={layer.id}>
           <Label htmlFor={layer.style.id}>{layer.style.label}</Label>
-          <Input id={layer.style.id} type="file"/>
+          <Input id={layer.style.id} type="file" />
         </LabelInputContainer>
       );
     } else if (layer.type === "input-otp") {
+      const numberOfGroups = Math.ceil(
+        (layer.style.otpBox ?? 6) /
+          (layer.style.optSepratorGap
+            ? layer.style.optSepratorGap > 0
+              ? layer.style.optSepratorGap
+              : 1
+            : 1)
+      );
+
+      let lastSlot = (layer.style.otpBox ?? 6) % numberOfGroups;
+      if (lastSlot === 0) lastSlot = layer.style.optSepratorGap ?? 2;
+
       return (
         <LabelInputContainer key={layer.id}>
           <Label htmlFor={layer.style.id}>{layer.style.label}</Label>
-          <InputOTP maxLength={6}>
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-            </InputOTPGroup>
-            <InputOTPSeparator />
-            <InputOTPGroup>
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-            </InputOTPGroup>
-            <InputOTPSeparator />
-            <InputOTPGroup>
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
+          <InputOTP maxLength={layer.style.otpBox ?? 6}>
+            {Array.from({
+              length: numberOfGroups,
+            }).map((_, index1) => {
+              return (
+                <div key={index1} className="flex justify-center items-center">
+                  <InputOTPGroup>
+                    {Array.from({
+                      length:
+                        index1 === numberOfGroups - 1
+                          ? lastSlot
+                          : layer.style.optSepratorGap ?? 2,
+                    }).map((_, index2) => {
+                      return (
+                        <InputOTPSlot
+                          index={
+                            index1 * (layer.style.optSepratorGap ?? 2) + index2
+                          }
+                          key={
+                            index1 * (layer.style.optSepratorGap ?? 2) + index2
+                          }
+                        />
+                      );
+                    })}
+                  </InputOTPGroup>
+                  {index1 <
+                    Math.ceil(
+                      (layer.style.otpBox ?? 6) /
+                        (layer.style.optSepratorGap ?? 2)
+                    ) -
+                      1 && <InputOTPSeparator />}
+                </div>
+              );
+            })}
           </InputOTP>
         </LabelInputContainer>
       );
@@ -118,19 +149,24 @@ const RenderLayers = (
           <Label htmlFor="file-upload" className="cursor-pointer">
             {layer.style.label}
           </Label>
-          <RadioGroup defaultValue="comfortable">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="default" id="r1" />
-              <Label htmlFor="r1">Option 1</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="comfortable" id="r2" />
-              <Label htmlFor="r2">Option 2</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="compact" id="r3" />
-              <Label htmlFor="r3">Option 3</Label>
-            </div>
+          <RadioGroup defaultValue="comfortable" className={`${layer.isToggled && "flex flex-wrap gap-8"}`}>
+            {Array.from({ length: layer.style.radioOptions ?? 3 }).map(
+              (_, index) => {
+                return (
+                  <div className="flex items-center space-x-2" key={index}>
+                    <RadioGroupItem
+                      value={index.toString()}
+                      id={`radio-${index}`}
+                    />
+                    <Label htmlFor="r1">
+                      {layer.style.radioOptionsName
+                        ? layer.style.radioOptionsName[index]
+                        : `Option ${index + 1}`}
+                    </Label>
+                  </div>
+                );
+              }
+            )}
           </RadioGroup>
         </LabelInputContainer>
       );
